@@ -5,78 +5,96 @@ X<data structures>
 X<nested data structures>
 
 Perl's aggregate data types--arrays and hashes--allow you to store scalars
-indexed by integers or string keys.  Perl 5's references (L<references>) allow
-you to access aggregate data types indirectly, through special scalars.  Nested
+indexed by integer or string keys. Note the word scalar. If you try to store an
+array in an array, Perl's automatic list flattening will make everything into a
+single array:
+
+=begin programlisting
+
+    my @counts = qw( eenie miney moe   );
+    my @ducks  = qw( huey  dewey louie );
+    my @game   = qw( duck  duck  goose );
+
+    my @famous_triplets = (
+        @counts, @ducks, @game
+    );
+
+=end programlisting
+
+Perl's solution to this is references (L<references>), which are special
+scalars that can refer to other variables (scalars, arrays, and hashes). Nested
 data structures in Perl, such as an array of arrays or a hash of hashes, are
-possible through the use of references.
+possible through the use of references. References are useful and you need to
+understand them, but you don't have to like their syntax--they're one of Perl's
+uglier features.
 
-=head2 Declaring Nested Data Structures
+X<operators; C<\>>
 
-A simple declaration of an array of arrays might be:
+Use the reference operator, C<\>, to produce a reference to a named variable:
 
 =begin programlisting
 
     my @famous_triplets = (
-        [qw( eenie miney moe )],
-        [qw( huey dewey louie )],
-        [qw( duck duck goose )],
+        B<\>@counts, B<\>@ducks, B<\>@game
     );
 
 =end programlisting
 
-... and a simple declaration of a hash of hashes might be:
+... or the anonymous reference declaration syntax to avoid the use of named
+variables:
 
 =begin programlisting
 
+    my @famous_triplets = (
+        B<[>qw( eenie miney moe   )B<]>,
+        B<[>qw( huey  dewey louie )B<]>,
+        B<[>qw( duck  duck  goose )B<]>,
+    );
+
     my %meals = (
-        breakfast => { entree => 'eggs',   side => 'hash browns' },
-        lunch     => { entree => 'panini', side => 'apple' },
-        dinner    => { entree => 'steak',  side => 'avocado salad' },
+        breakfast => B<{> entree => 'eggs',
+                       side   => 'hash browns'   B<}>,
+        lunch     => B<{> entree => 'panini',
+                       side   => 'apple'         B<}>,
+        dinner    => B<{> entree => 'steak',
+                       side   => 'avocado salad' B<}>,
     );
 
 =end programlisting
 
-=begin sidebar
+=begin tip Commas are Free
 
-Perl allows but does not require the trailing comma so as to ease adding new
-elements to the list.
+Perl allows an optional trailing comma after the last element of a list. This
+makes it easy to add more elements in the future.
 
-=end sidebar
+=end tip
 
-=head2 Accessing Nested Data Structures
-
-Accessing elements in nested data structures uses Perl's reference syntax.  The
-sigil denotes the amount of data to retrieve, and the dereferencing arrow
-indicates that the value of one portion of the data structure is a reference:
+Use Perl's reference syntax to access elements in nested data structures. The
+sigil denotes the amount of data to retrieve. The dereferencing arrow indicates
+that the value of one portion of the data structure is a reference:
 
 =begin programlisting
 
     my $last_nephew = $famous_triplets[1]->[2];
-    my $breaky_side = $meals{breakfast}->{side};
+    my $meal_side   = $meals{breakfast}->{side};
 
 =end programlisting
 
-In the case of a nested data structure, the only way to nest a data structure
-is through references, thus the arrow is superfluous.  This code is equivalent
-and clearer:
+The only way to nest a multi-level data structure is through references, so the
+arrow in the previous examples is superfluous. You may omit it for clarity,
+except for invoking function references:
 
 =begin programlisting
 
-    my $last_nephew = $famous_triplets[1][2];
-    my $breaky_side = $meals{breakfast}{side};
+    my $nephew = $famous_triplets[1][2];
+    my $meal   = $meals{breakfast}{side};
+
+    $actions{generous}{buy_food}->( $nephew, $meal );
 
 =end programlisting
 
-=begin sidebar
-
-You can avoid the arrow in every case except invoking a function reference
-stored in a nested data structure, where the arrow invocation syntax is the
-clearest mechanism of invocation.
-
-=end sidebar
-
-Accessing components of nested data structures as if they were first-class
-arrays or hashes requires disambiguation blocks:
+Use disambiguation blocks to access components of nested data structures as if
+they were first-class arrays or hashes:
 
 =begin programlisting
 
@@ -85,35 +103,47 @@ arrays or hashes requires disambiguation blocks:
 
 =end programlisting
 
-Similarly, slicing a nested data structure requires additional punctuation:
+... or to slice a nested data structure:
 
 =begin programlisting
 
-    my ($entree, $side) = @{ $meals{breakfast} }{qw( entree side )};
+    my ($entree, $side) =
+     @{ $meals{breakfast} }{ qw( entree side ) };
 
 =end programlisting
 
-The use of whitespace helps, but it does not entirely eliminate the noise of
-this construct.  Sometimes using temporary variables can clarify:
+Whitespace helps, but does not entirely eliminate the noise of this construct.
+Sometimes a temporary variable provides more clarity:
 
 =begin programlisting
 
-    my $breakfast_ref   = $meals{breakfast};
-    my ($entree, $side) = @$breakfast_ref{qw( entree side )};
+    my $meal_ref        = $meals{breakfast};
+    my ($entree, $side) = @$meal_ref{qw( entree side )};
+
+=end programlisting
+
+X<aliasing>
+
+... or use C<for>'s implicit aliasing to avoid the use of an intermediate
+reference (though note the lack of C<my>):
+
+=begin programlisting
+
+    ($entree, $side) = @{ $_ }{qw( entree side )}
+                       for $meals{breakfast};
 
 =end programlisting
 
 C<perldoc perldsc>, the data structures cookbook, gives copious examples of how
-to use the various types of data structures available in Perl.
+to use Perl's various data structures.
 
 =head2 Autovivification
 
 Z<autovivification>
 X<autovivification>
 
-Perl's expressivity extends to nested data structures.  When you attempt to
-write to a component of a nested data structure, Perl will create the path
-through the data structure to that piece if it does not exist:
+When you attempt to write to a component of a nested data structure, Perl will
+create the path through the data structure to the destination as necessary:
 
 =begin programlisting
 
@@ -124,14 +154,15 @@ through the data structure to that piece if it does not exist:
 
 After the second line of code, this array of arrays of arrays of arrays
 contains an array reference in an array reference in an array reference in an
-array reference.  Each array reference contains one element.  Similarly,
-treating an undefined value as if it were a hash reference in a nested data
-structure will create intermediary hashes, keyed appropriately:
+array reference. Each array reference contains one element.
+
+Similarly, when you ask Perl to treat an undefined value as if it were a hash
+reference, Perl will turn that undefined value into a hash reference:
 
 =begin programlisting
 
     my %hohoh;
-    $hohoh{Robot}{Santa}{Claus} = 'mostly harmful';
+    $hohoh{Robot}{Santa} = 'mostly harmful';
 
 =end programlisting
 
@@ -139,49 +170,45 @@ X<autovivification>
 X<C<autovivification> pragma>
 X<pragmas; C<autovivification>>
 
-This behavior is I<autovivification>, and it's more often useful than it isn't.
-Its benefit is in reducing the initialization code of nested data structures.
-Its drawback is in its inability to distinguish between the honest intent to
-create missing elements in nested data structures and typos.
-
-The C<autovivification> pragma on the CPAN (L<pragmas>) lets you disable
-autovivification in a lexical scope for specific types of operations; it's
-worth your time to consider this in large projects, or projects with multiple
-developers.
-
-=begin sidebar
-
-You can also check for the existence of specific hash keys and the number of
-elements in arrays before dereferencing each level of a complex data structure,
-but that can produce tedious, lengthy code which many programmers prefer to
-avoid.
-
-=end sidebar
+This behavior is I<autovivification>. While it reduces the initialization code
+of nested data structures, it cannot distinguish between the honest intent to
+create missing elements in nested data structures or an accidental typo.
 
 You may wonder at the contradiction between taking advantage of
-autovivification while enabling C<strict>ures.  The question is one of balance.
-is it more convenient to catch errors which change the behavior of your program
-at the expense of disabling those error checks for a few well-encapsulated
-symbolic references?  Is it more convenient to allow data structures to grow
-rather than specifying their size and allowed keys?
+autovivification while enabling C<strict>ures. The question is one of balance.
+Is it more convenient to catch errors which change the behavior of your program
+at the expense of disabling error checks for a few well-encapsulated symbolic
+references? Is it more convenient to allow data structures to grow or safer to
+require a fixed size and an allowed set of keys?
 
-The answer to the latter question depends on your specific project.  When
-initially developing, you can allow yourself the freedom to experiment.  When
-testing and deploying, you may want to increase strictness to prevent unwanted
-side effects.  Thanks to the lexical scoping of the C<strict> and
-C<autovivification> pragmas, you can enable and disable these behaviors as
-necessary.
+=begin tip Controlling Autovivification
+
+The C<autovivification> pragma (L<pragmas>) from the CPAN lets you disable
+autovivification in a lexical scope for specific types of operations.
+
+=end tip
+
+The answers depend on your project. During early development, allow yourself
+the freedom to experiment. While testing and deploying, consider an increase of
+strictness to prevent unwanted side effects. Thanks to the lexical scoping of
+the C<strict> and C<autovivification> pragmas, you can enable these behaviors
+where and as necessary.
+
+You I<can> verify your expectations before dereferencing each level of a
+complex data structure, but the resulting code is often lengthy and tedious.
+It's better to avoid deeply nested data structures by revising your
+data model to provide better encapsulation.
 
 =head2 Debugging Nested Data Structures
 
-The complexity of Perl 5's dereferencing syntax combined with the potential for
+The complexity of Perl's dereferencing syntax combined with the potential for
 confusion with multiple levels of references can make debugging nested data
-structures difficult.  Two good options exist for visualizing them.
+structures difficult. Two good visualization tools exist.
 
 X<C<Data::Dumper>>
 
-The core module C<Data::Dumper> can stringify values of arbitrary complexity
-into Perl 5 code:
+The core module C<Data::Dumper> converts values of arbitrary complexity into
+strings of Perl code:
 
 =begin programlisting
 
@@ -191,15 +218,15 @@ into Perl 5 code:
 
 =end programlisting
 
-This is useful for identifying what a data structure contains, what you should
-access, and what you accessed instead.  C<Data::Dumper> can dump objects as
-well as function references (if you set C<$Data::Dumper::Deparse> to a true
+Use this when you need to figure out what a data structure contains, what you
+should access, and what you accessed instead. C<Data::Dumper> can dump objects
+as well as function references (if you set C<$Data::Dumper::Deparse> to a true
 value).
 
-While C<Data::Dumper> is a core module and prints Perl 5 code, it also produces
-verbose output.  Some developers prefer the use of the C<YAML::XS> or C<JSON>
-modules for debugging.  You have to learn a different format to understand
-their outputs, but their outputs can be much clearer to read and to understand.
+While C<Data::Dumper> is a core module and prints Perl code, its output is
+verbose. Some developers prefer the use of the C<YAML::XS> or C<JSON> modules
+for debugging. They do not produce Perl code, but their outputs can be much
+clearer to read and to understand.
 
 =head2 Circular References
 
@@ -209,71 +236,68 @@ X<circular references>
 X<memory management; circular references>
 X<garbage collection>
 
-Perl 5's memory management system of reference counting (L<reference_counts>)
-has one drawback apparent to user code.  Two references which end up pointing
-to each other form a I<circular reference> that Perl cannot destroy on its own.
-Consider a biological model, where each entity has two parents and can have
-children:
+Perl's memory management system of reference counting (L<reference_counts>) has
+one drawback. Two references which point to each other (directly or indirectly)
+form a I<circular reference> that Perl cannot destroy on its own. Consider a
+biological model, where each entity has two parents and zero or more children:
 
 =begin programlisting
 
-    my $alice  = { mother => '',     father => '',      children => [] };
-    my $robert = { mother => '',     father => '',      children => [] };
-    my $cianne = { mother => $alice, father => $robert, children => [] };
+    my $alice  = { mother => '',     father => ''     };
+    my $robin  = { mother => '',     father => ''     };
+    my $cianne = { mother => $alice, father => $robin };
 
-    push @{ $alice->{children}  }, $cianne;
-    push @{ $robert->{children} }, $cianne;
+    push @{ $alice->{children} }, $cianne;
+    push @{ $robin->{children} }, $cianne;
 
 =end programlisting
 
-Because both C<$alice> and C<$robert> contain an array reference which contains
-C<$cianne>, and because C<$cianne> is a hash reference which contains C<$alice>
-and C<$robert>, Perl can never decrease the reference count of any of these
-three people to zero.  It doesn't recognize that these circular references
-exist, and it can't manage the lifespan of these entities.
+Both C<$alice> and C<$robin> contain an array reference which contains
+C<$cianne>. Because C<$cianne> is a hash reference which contains C<$alice> and
+C<$robin>, Perl will never decrease the reference count of any of these three
+people to zero. It doesn't recognize that these circular references exist, and
+it can't manage the lifespan of these entities.
 
 X<references; weak>
 X<weak references>
 X<C<Scalar::Util>>
 
-You must either break the reference count manually yourself (by clearing the
-children of C<$alice> and C<$robert> or the parents of C<$cianne>), or take
-advantage of a feature called I<weak references>.  A weak reference is a
-reference which does not increase the reference count of its referent.  Weak
-references are available through the core module C<Scalar::Util>.  Export the
-C<weaken()> function and use it on a reference to prevent the reference count
-from increasing:
+Either break the reference count manually yourself (by clearing the children of
+C<$alice> and C<$robin> or the parents of C<$cianne>), or use I<weak
+references>. A weak reference is a reference which does not increase the
+reference count of its referent. Use the core module C<Scalar::Util>'s
+C<weaken()> function to weaken a reference:
 
 =begin programlisting
 
     use Scalar::Util 'weaken';
 
-    my $alice  = { mother => '',     father => '',      children => [] };
-    my $robert = { mother => '',     father => '',      children => [] };
-    my $cianne = { mother => $alice, father => $robert, children => [] };
+    my $alice  = { mother => '',     father => ''     };
+    my $robin  = { mother => '',     father => ''     };
+    my $cianne = { mother => $alice, father => $robin };
 
-    push @{ $alice->{children}  }, $cianne;
-    push @{ $robert->{children} }, $cianne;
+    push @{ $alice->{children} }, $cianne;
+    push @{ $robin->{children} }, $cianne;
 
     B<< weaken( $cianne->{mother} ); >>
     B<< weaken( $cianne->{father} ); >>
 
 =end programlisting
 
-With this accomplished, C<$cianne> will retain references to C<$alice> and
-C<$robert>, but those references will not by themselves prevent Perl's garbage
-collector from destroying those data structures.  You rarely have to use weak
-references if you design your data structures correctly, but they're useful in
-a few situations.
+C<$cianne> will retain usable references to C<$alice> and C<$robin>, but those
+weak references do not count toward the number of remaining references to the
+parents. If the reference count of C<$alice> reaches zero, Perl's garbage
+collector will reclaim her record, even though C<$cianne> has a weak reference
+to C<$alice>. Be aware that, when C<$alice> gets reclaimed, C<$cianne>'s
+reference to C<$alice> will be set to C<undef>.
+
+Most data structures do not need weak references, but when they're necessary,
+they're invaluable.
 
 =head2 Alternatives to Nested Data Structures
 
 While Perl is content to process data structures nested as deeply as you can
-imagine, the human cost of understanding these data structures as well as the
-relationship of various pieces, not to mention the syntax required to access
-various portions, can be high.  Beyond two or three levels of nesting, consider
-whether modeling various components of your system with classes and objects
-(L<moose>) will allow for a clearer representation of your data.
-
-Sometimes bundling data with behaviors appropriate to that data can clarify
-code.
+imagine, the human cost of understanding these data structures and their
+relationships--to say nothing of the complex syntax--is high. Beyond two or
+three levels of nesting, consider whether modeling various components of your
+system with classes and objects (L<moose>) will allow for clearer code.

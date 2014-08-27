@@ -1,10 +1,9 @@
 =head0 What to Avoid
 
-Perl 5 isn't perfect.  Some features seemed like good ideas at the time, but
-they're difficult to use correctly.  Others don't work as anyone might expect.
-A few more are simply bad ideas.  These features will likely persist--removing
-a feature from Perl is a serious process reserved for only the most egregious
-offenses--but you can and should avoid them in almost every case.
+Perl isn't perfect. Some features are difficult to use correctly and others
+seemed great but don't work all that well. A few features combine with others
+in strange ways with weird edge cases. Knowing Perl's rough edges will help you
+avoid them, when possible, and avoid rough edges when you must use them.
 
 L<barewords>
 
@@ -13,5 +12,7 @@ L<indirect_objects>
 L<prototypes>
 
 L<method_sub_equivalence>
+
+L<automatic_dereferencing>
 
 L<tie>
