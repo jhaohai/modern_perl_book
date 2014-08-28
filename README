@@ -78,14 +78,15 @@ build_chapters.pl 程序将这些小节缝合为章，并将它们写到 build/c
 向 Modern Perl 做贡献
 ---------------------------
 
-现在，本书稿以知识共享“署名-非商业性使用-禁止演绎 3.0 美国” (Creative Commons 
-Attribution-Noncommercial-No Derivative Works 3.0 United States License) 许可发布。详见如下链接：
+本作品以知识共享“署名-非商业性使用-相同方式共享 3.0 美国” (Creative Commons 
+Attribution-Noncommercial-ShareAlike 3.0 United States License) 许可发布。详见如下链接：
 
-    http://creativecommons.org/licenses/by-nc-nd/3.0/us/
+    http://creativecommons.org/licenses/by-nc-sa/3.0/us/
 
-请随意向他人推荐本代码仓库。欢迎提交建议和贡献。请不要分发本稿的自行修改版本（可以用 git 来 fork
-，但我请求你将补丁或 pull request 发送给我）。
+请随意将他人指向本代码仓库。欢迎提交建议和贡献。你可以分发本稿的修改版本，但我可以请求（而不是要求）提交错误或 pull request。
 
-本书由 Onyx Neon Press 印行后，将以一个更为宽松的许可提供：
+本书由 Onyx Neon Press 提供印刷版和电子版。
 
-    http://www.onyxneon.com/
+    http://www.onyxneon.com/books/modern_perl/index.html
+    
+电子版可自由获取，并且没有任何限制，可自由分发。
