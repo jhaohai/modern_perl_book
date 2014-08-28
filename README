@@ -48,8 +48,7 @@ http://www.modernperlbooks.com/mt/2009/01/why-modern-perl.html
 
     $ perl build/tools/build_chapters.pl
 
-源章节位于 sections/ 目录下。每章都对应一个 chapter_nn.pod 文件。每个文件都包含多个 POD
-链接，指向 sections/ 目录下的其他文件。每一个被指向的文件都含有一个 PseudoPOD Z<> 锚点。
+源章节位于 sections/ 目录下。每章都对应一个 chapter_nn.pod 文件。每个文件都包含多个 POD 链接，指向 sections/ 目录下的其他文件。每一个被指向的文件都含有一个 PseudoPOD Z<> 锚点。
 
 build_chapters.pl 程序将这些小节缝合为章，并将它们写到 build/chapters 目录下的 POD 文件中。
 
@@ -59,8 +58,7 @@ build_chapters.pl 程序将这些小节缝合为章，并将它们写到 build/c
 
     $ perl build/tools/build_html.pl
 
-此命令将在 build/html/ 目录下生成格式齐整的 HTML 文件。如果有什么不正常的地方，算作我的失误
-（也可能是 CSS 问题），欢迎提交补丁。
+此命令将在 build/html/ 目录下生成格式齐整的 HTML 文件。如果有什么不正常的地方，算作我的失误（也可能是 CSS 问题），欢迎提交补丁。
 
 从已缝合章节生成本书的 ePub 电子书版本：
 
@@ -78,8 +76,7 @@ build_chapters.pl 程序将这些小节缝合为章，并将它们写到 build/c
 向 Modern Perl 做贡献
 ---------------------------
 
-本作品以知识共享“署名-非商业性使用-相同方式共享 3.0 美国” (Creative Commons 
-Attribution-Noncommercial-ShareAlike 3.0 United States License) 许可发布。详见如下链接：
+本作品以知识共享“署名-非商业性使用-相同方式共享 3.0 美国” (Creative Commons Attribution-Noncommercial-ShareAlike 3.0 United States License) 许可发布。详见如下链接：
 
     http://creativecommons.org/licenses/by-nc-sa/3.0/us/
 
